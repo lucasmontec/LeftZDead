@@ -1,6 +1,6 @@
 package com.aliensoft;
 
-import com.aliensoft.core.FPCameraController;
+import com.aliensoft.core.FPSpectatorCameraController;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -22,7 +22,7 @@ public class LZDGame extends ApplicationAdapter {
 	public ModelBatch					modelBatch;
 	public Model						model;
 	public ModelInstance				instance;
-	private FPCameraController	camController;
+	private FPSpectatorCameraController	camController;
 
 	@Override
 	public void create () {
@@ -49,7 +49,7 @@ public class LZDGame extends ApplicationAdapter {
 				| Usage.TextureCoordinates);
 		instance = new ModelInstance(model);
 
-		camController = new FPCameraController(cam);
+		camController = new FPSpectatorCameraController(cam);
 		camController.setVelocity(20f);
 		Gdx.input.setInputProcessor(camController);
 	}

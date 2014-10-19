@@ -1,17 +1,25 @@
 package com.aliensoft.core;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.IntIntMap;
 
 /**
  * Takes a {@link Camera} instance and controls it via w,a,s,d and mouse panning.
  * 
  * @author badlogic
  */
-public class FPCameraController extends InputAdapter {
+public class FPSpectatorCameraController extends InputAdapter {
 	private final Camera	camera;
+	private final IntIntMap	keys				= new IntIntMap();
+	private final int		STRAFE_LEFT			= Keys.A;
+	private final int		STRAFE_RIGHT		= Keys.D;
+	private final int		FORWARD				= Keys.W;
+	private final int		BACKWARD			= Keys.S;
+	private float			velocity			= 5;
 	private float			degreesPerPixel		= 0.5f;
 	private final Vector3	tmp					= new Vector3();
 	private boolean			shouldResetMouse	= true;
@@ -26,7 +34,7 @@ public class FPCameraController extends InputAdapter {
 	 * @param camera
 	 * @param verticalLimit
 	 */
-	public FPCameraController(Camera camera, float verticalLimit) {
+	public FPSpectatorCameraController(Camera camera, float verticalLimit) {
 		this.camera = camera;
 		this.verticalLimit = (verticalLimit > 0.999f ? 0.999f : verticalLimit);
 		setResetMouse(true);
@@ -37,8 +45,30 @@ public class FPCameraController extends InputAdapter {
 	 * 
 	 * @param camera
 	 */
-	public FPCameraController(Camera camera) {
+	public FPSpectatorCameraController(Camera camera) {
 		this(camera, 0.98f);
+	}
+
+	@Override
+	public boolean keyDown(int keycode) {
+		keys.put(keycode, keycode);
+		return true;
+	}
+
+	@Override
+	public boolean keyUp(int keycode) {
+		keys.remove(keycode, 0);
+		return true;
+	}
+
+	/**
+	 * Sets the velocity in units per second for moving forward, backward and strafing left/right.
+	 * 
+	 * @param velocity
+	 *            the velocity in units per second
+	 */
+	public void setVelocity(float velocity) {
+		this.velocity = velocity;
 	}
 
 	/**
@@ -51,28 +81,40 @@ public class FPCameraController extends InputAdapter {
 	}
 
 	public void update() {
+		update(Gdx.graphics.getDeltaTime());
+	}
+
+	public void update(float deltaTime) {
 		if (shouldResetMouse)
 			updateMouse();
 
+		if (keys.containsKey(FORWARD)) {
+			tmp.set(camera.direction).nor().scl(deltaTime * velocity);
+			camera.position.add(tmp);
+		}
+		if (keys.containsKey(BACKWARD)) {
+			tmp.set(camera.direction).nor().scl(-deltaTime * velocity);
+			camera.position.add(tmp);
+		}
+		if (keys.containsKey(STRAFE_LEFT)) {
+			tmp.set(camera.direction).crs(camera.up).nor().scl(-deltaTime * velocity);
+			camera.position.add(tmp);
+		}
+		if (keys.containsKey(STRAFE_RIGHT)) {
+			tmp.set(camera.direction).crs(camera.up).nor().scl(deltaTime * velocity);
+			camera.position.add(tmp);
+		}
+		/*
+		 * if (keys.containsKey(UP)) {
+		 * tmp.set(camera.up).nor().scl(deltaTime * velocity);
+		 * camera.position.add(tmp);
+		 * }
+		 * if (keys.containsKey(DOWN)) {
+		 * tmp.set(camera.up).nor().scl(-deltaTime * velocity);
+		 * camera.position.add(tmp);
+		 * }
+		 */
 		camera.update(true);
-	}
-
-	/**
-	 * Move the camera by the vector pos
-	 * 
-	 * @param pos
-	 */
-	public void translate(Vector3 pos) {
-		camera.translate(pos);
-	}
-
-	/**
-	 * returns the camera current position
-	 * 
-	 * @return The same as written above man!
-	 */
-	public Vector3 getPosition() {
-		return camera.position;
 	}
 
 	private void updateMouse() {
