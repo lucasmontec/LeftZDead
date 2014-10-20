@@ -1,6 +1,6 @@
 package com.aliensoft;
 
-import com.aliensoft.core.FPSpectatorCameraController;
+import com.aliensoft.core.camera.FPSpectatorCameraController;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
