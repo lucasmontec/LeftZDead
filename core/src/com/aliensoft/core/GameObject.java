@@ -1,53 +1,71 @@
 package com.aliensoft.core;
 
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.utils.Disposable;
 
-public class GameObject {
+public class GameObject implements Disposable {
 
 	/* Bullet */
-	private btCollisionShape	collisionShape;
-	private btCollisionObject	collisionObject;
+	public btRigidBody								body;
+	private btRigidBody.btRigidBodyConstructionInfo	constructionInfo;
 
 	/* 3d api */
-	private ModelInstance		model;
+	private ModelInstance							model;
 
 	/* game api */
 	private String				objectID;
+	private static int								UID;
 
-	public GameObject() {}
-
-	public GameObject(ModelInstance mdl, btCollisionShape shape) {
-		model = mdl;
-		collisionShape = shape;
+	public GameObject() {
+		makeID();
 	}
 
-	/* Calls after constructing inside constructor */
-	{
-		collisionObject = new btCollisionObject();
-		create();
+	public GameObject(Model mdl, btCollisionShape shape, float mass) {
+		model = new ModelInstance(mdl);
+		Vector3 localInertia = new Vector3(0, 0, 0);
+		if (mass > 0f)
+			shape.calculateLocalInertia(mass, localInertia);
+		constructionInfo = new btRigidBody.btRigidBodyConstructionInfo(mass, null, shape, localInertia);
+		body = new btRigidBody(constructionInfo);
+		body.setUserValue(UID);
+		makeID();
+	}
+
+	public void translate(Vector3 pos) {
+		model.transform.trn(pos);
+		body.setWorldTransform(model.transform);
+	}
+
+	public void setAngles(float pitch, float yaw, float roll) {
+		model.transform.setFromEulerAngles(pitch, yaw, roll);
+		body.setWorldTransform(model.transform);
 	}
 
 	/**
-	 * Makes the instance valid applying the bullet shape and model transform
+	 * Updates the model transform from the bullet rigidbody transform
 	 */
-	private void create() {
-		if(collisionObject != null) {
-			// Set shape
-			if (collisionShape != null)
-				collisionObject.setCollisionShape(collisionShape);
-			// Set transform
-			if (model != null)
-				collisionObject.setWorldTransform(model.transform);
-		}
+	public void update() {
+		body.getWorldTransform(model.transform);
+	}
+
+	public ModelInstance getModel() {
+		return model;
+	}
+
+	@Override
+	public void dispose() {
+		constructionInfo.dispose();
 	}
 
 	public String getObjectID() {
 		return objectID;
 	}
 
-	public void setObjectID(String objectID) {
-		this.objectID = objectID;
+	private void makeID() {
+		objectID = "OBJ_" + (UID++);
 	}
 }

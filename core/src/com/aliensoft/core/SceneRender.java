@@ -3,40 +3,56 @@ package com.aliensoft.core;
 import java.util.HashMap;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.utils.Disposable;
 
-public class SceneRender {
+public class SceneRender implements Disposable {
 
-	public HashMap<Class<?>, IObjectRenderer>	renderers	= new HashMap<>();
+	protected final HashMap<Class<?>, IObjectRenderer>	renderers	= new HashMap<>();
 
-	public HashMap<String, GameObject>	objects		= new HashMap<>();
+	protected final HashMap<String, GameObject>			objects		= new HashMap<>();
+
+	protected final ModelBatch							batch		= new ModelBatch();
 
 	/**
 	 * Renders the scene and all objects in it using the renderers.
 	 * 
 	 * @param mb
 	 *            The batch to use for rendering
+	 * @param env
+	 *            The environment to render each model
 	 * @param cam
 	 *            The camera to render the scene to
 	 * @param delta
 	 *            The delta time since last call
 	 * @return the number of objects not rendered (# of obj that don't have a renderer)
 	 */
-	public int render(ModelBatch mb, Camera cam, float delta) {
-		mb.begin(cam);
+	public int render(Environment env, Camera cam, float delta) {
+		batch.begin(cam);
 		int objectsIgnoredInRender = 0;
 		for (GameObject obj : objects.values()) {
 			IObjectRenderer renderer = renderers.get(obj.getClass());
 
 			//Render if not null
 			if (renderer != null) {
-				renderer.render(obj);
+				renderer.render(obj, env, batch);
 			} else
 				objectsIgnoredInRender++;
 		}
-		mb.end();
+		batch.end();
 
 		return objectsIgnoredInRender;
+	}
+
+	public void dispose() {
+		for (GameObject obj : objects.values()) {
+			obj.dispose();
+		}
+		objects.clear();
+		renderers.clear();
+
+		batch.dispose();
 	}
 
 	/**
