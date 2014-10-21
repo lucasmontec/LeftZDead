@@ -5,13 +5,20 @@ import java.util.HashMap;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
 public class SceneRender implements Disposable {
 
+	/** Renderers for game objects */
 	protected final HashMap<Class<?>, IObjectRenderer>	renderers	= new HashMap<>();
 
+	/** Game physics objects */
 	protected final HashMap<String, GameObject>			objects		= new HashMap<>();
+
+	/** Models for decoration */
+	protected final Array<ModelInstance>				models		= new Array<>();
 
 	protected final ModelBatch							batch		= new ModelBatch();
 
@@ -40,6 +47,10 @@ public class SceneRender implements Disposable {
 			} else
 				objectsIgnoredInRender++;
 		}
+
+		// Render decoration objects
+		batch.render(models);
+
 		batch.end();
 
 		return objectsIgnoredInRender;
@@ -80,6 +91,16 @@ public class SceneRender implements Disposable {
 
 		objects.put(object.getObjectID(), object);
 		return true;
+	}
+
+	/**
+	 * Register a decoration model for rendering in this scene.
+	 * Doesn't have collision.
+	 * 
+	 * @param model
+	 */
+	public void registerDecorationObject(ModelInstance model) {
+		models.add(model);
 	}
 
 }
