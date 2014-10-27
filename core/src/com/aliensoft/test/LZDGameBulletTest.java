@@ -58,6 +58,7 @@ public class LZDGameBulletTest extends ApplicationAdapter {
 		lights = new Environment();
 		lights.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.2f, 0.2f, 0.2f, 1f));
 		lights.add(new DirectionalLight().set(0.7f, 0.7f, 0.7f, -1f, -0.8f, -0.2f));
+		// lights.add(new PointLight().set(Color.BLUE, 0f, 10f, 4f, 50f));
 
 		cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		cam.position.set(10f, 10f, 10f);
@@ -78,14 +79,16 @@ public class LZDGameBulletTest extends ApplicationAdapter {
 				1f,
 				6,
 				6,
-				new Material(ColorAttribute.createDiffuse(Color.WHITE)),
-				Usage.Position | Usage.Normal);
+				new Material(ColorAttribute.createDiffuse(Color.BLACK), ColorAttribute
+						.createSpecular(Color.BLUE)),
+						Usage.Position | Usage.Normal);
 
 		camController = new FPSpectatorCameraController(cam);
 		camController.setVelocity(20f);
 		Gdx.input.setInputProcessor(new InputMultiplexer(new BallSpawnerProcessor(), camController));
 
 		scene = new BulletScene();
+		scene.create();
 		scene.registerRenderer(new GameObjectRenderer());
 
 		collisionConfig = new btDefaultCollisionConfiguration();

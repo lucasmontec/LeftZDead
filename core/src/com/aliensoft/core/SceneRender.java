@@ -2,6 +2,7 @@ package com.aliensoft.core;
 
 import java.util.HashMap;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -20,7 +21,12 @@ public class SceneRender implements Disposable {
 	/** Models for decoration */
 	protected final Array<ModelInstance>				models		= new Array<>();
 
-	protected final ModelBatch							batch		= new ModelBatch();
+	protected ModelBatch								batch;
+
+	public void create() {
+		batch = new ModelBatch(Gdx.files.internal("shaders/lighting.vertex.glsl"),
+				Gdx.files.internal("shaders/lighting.fragment.glsl"));
+	}
 
 	/**
 	 * Renders the scene and all objects in it using the renderers.
